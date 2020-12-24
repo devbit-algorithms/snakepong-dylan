@@ -15,6 +15,12 @@ velocityY = 0
 
 snake = SingleLinkedList()
 snake.prepend(((0, 0), (100, 100), (255,255,255)))
+snake.prepend(((0, 0), (100, 100),  (0,255,255)))
+snake.prepend(((0, 0), (100, 100),  (255,0,255)))
+snake.prepend(((0, 0), (100, 100),  (255,255,0)))
+snake.prepend(((0, 0), (100, 100),  (255,0,0)))
+snake.prepend(((0, 0), (100, 100),  (0,255,0)))
+snake.prepend(((0, 0), (100, 100),  (0,0,255)))
 
 snake.printToConsole()
 
@@ -24,6 +30,23 @@ def showSnake(snake):
     if snake.head() is not None:
         pygame.draw.rect(game,snake.head()[2],[snake.head()[1][0], snake.head()[1][1], blockSize, blockSize])
         showSnake(snake.tail())
+
+def step(snake, direction):
+    if not snake.head() is None:
+        vec = snake.head()[0]
+        snake.update((
+            direction,
+            (snake.head()[1][0]+vec[0], snake.head()[1][1]+vec[1]),
+            snake.head()[2]
+        ))
+        snake = snake.tail()
+        step(snake, vec)
+
+
+
+
+
+
 
 while not gameEnded:
     for event in pygame.event.get():
@@ -43,12 +66,7 @@ while not gameEnded:
                 velocityY = blockSize
                 velocityX = 0
 
-    update = (
-        (velocityX, velocityY),
-        (snake.head()[1][0] + snake.head()[0][0], snake.head()[1][1] + snake.head()[0][1]),
-        (255, 255, 255))
-
-    snake.update(update)
+    step(snake, (velocityX, velocityY))
 
     showSnake(snake)
     pygame.display.update()
