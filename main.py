@@ -7,15 +7,17 @@ pygame.init()
 display = (400, 400)
 game = pygame.display.set_mode(display)
 
+counter = 0
+
 # block size
 blockSize = 10
 
-ballPos = (100, 200)
-ballVel = (10, 15)
+# pong ball
+ballPos = (100, 150)
+ballVel = (1.0, 1.5)
 
 # snake velocity
-velocityX = 0
-velocityY = 0
+snakeVelocity = (0, 0)
 
 # (velocity), (position), (color)
 snake = SingleLinkedList()
@@ -68,6 +70,45 @@ def collidingWall(pos):
         return ((0, -1), 1)
     return ((0, 0), 0)
 
+def collidingPixels(posA, posB):
+    if (
+        posA[0] < posB[0] + blockSize and
+        posA[0] + blockSize > posB[0] and
+        posA[1] < posB[1] + blockSize and
+        posA[1] + blockSize > posB[1]):
+        xInd = posB[0] - posA[0]
+        yInd = posB[1] - posA[1]
+
+        print("X: " + str(xInd) + ", Y: " + str(yInd))
+
+        if (xInd < 0 and xInd < -abs(yInd)):
+            return ((1, 0), 1)
+        elif (xInd > 0 and xInd > abs(yInd)):
+            return ((-1, 0), 1)
+        elif (yInd < 0):
+            return ((0, 1), 1)
+        elif (yInd > 0):
+            return ((0, -1), 1)
+
+    return ((0, 0), 0)
+
+
+
+def overlappingSnake(snake, position):
+    overlapping = False
+    if not snake.head() is None:
+        collide = collidingPixels(snake.head()[1], position)
+        print(collide)
+        print("")
+        print("")
+        print("")
+        if collide[1] == 1:
+            return collide
+        else:
+            return overlappingSnake(snake.tail(), position)
+    else:
+        return ((0, 0), 0)
+
 def reflect(vel, nor):
     if nor[0] == 0 and nor[1] == 0:
         return vel
@@ -86,17 +127,17 @@ while (not gameEnded) and (collidingWall(snake.head()[1])[1] == 0):
             gameEnded = True
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                velocityX = -1
-                velocityY = 0
+                snakeVelocity = (-1, 0)
+                #ballPos = (ballPos[0]-1, ballPos[1])
             elif event.key == pygame.K_RIGHT:
-                velocityX = 1
-                velocityY = 0
+                snakeVelocity = (1, 0)
+                #ballPos = (ballPos[0]+1, ballPos[1])
             elif event.key == pygame.K_UP:
-                velocityY = -1
-                velocityX = 0
+                snakeVelocity = (0, -1)
+                #ballPos = (ballPos[0], ballPos[1]-1)
             elif event.key == pygame.K_DOWN:
-                velocityY = 1
-                velocityX = 0
+                snakeVelocity = (0, 1)
+                #ballPos = (ballPos[0], ballPos[1]+1)
             elif event.key == pygame.K_SPACE:
                 addBody(snake, (0,0,255))
 
@@ -104,23 +145,25 @@ while (not gameEnded) and (collidingWall(snake.head()[1])[1] == 0):
         gameEnded = True
         break
 
-    step(snake, (velocityX, velocityY))
+    if counter%10 == 0:
+        step(snake, snakeVelocity)
     showSnake(snake)
 
-    
+    counter = counter+1
 
     collide = collidingWall(ballPos)
-    if (collide[1] == 0):
-        ballPos = (ballPos[0] + ballVel[0], ballPos[1] + ballVel[1])
-    else:
+    if (collide[1] != 0):
         ballVel = reflect(negVector(ballVel), collide[0])
-        ballPos = (ballPos[0] + ballVel[0], ballPos[1] + ballVel[1])
 
+    collideSnake = overlappingSnake(snake, ballPos)
+    if (collideSnake[1] != 0):
+        ballVel = reflect(negVector(ballVel), collideSnake[0])
+        
+    ballPos = (ballPos[0] + ballVel[0], ballPos[1] + ballVel[1])
     pixel(ballPos, (255,0,0))
     
-
     pygame.display.update()
     pygame.draw.rect(game,(0,0,0),[0,0,display[0],display[1]])
-    time.sleep(0.1)
+    time.sleep(0.01)
 
 pygame.quit()
