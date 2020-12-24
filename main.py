@@ -10,6 +10,10 @@ game = pygame.display.set_mode(display)
 # block size
 blockSize = 10
 
+ballPos = (100, 200)
+ballVel = (10, 15)
+
+# snake velocity
 velocityX = 0
 velocityY = 0
 
@@ -52,11 +56,31 @@ def addBody(snake, color):
 def pixel(pos, color):
     pygame.draw.rect(game,color,[pos[0], pos[1], blockSize, blockSize])
 
-def collidingWall(snake):
-    position = snake.head()[1]
-    return position[0] <= 0 or position[0] >= display[0] - 1 or position[1] <= 0 or position[1] >= display[1] - 1
+def collidingWall(pos):
+    position = pos
+    if position[0] <= 0:
+        return ((1, 0), 1)
+    if position[0] >= display[0] - blockSize:
+        return ((-1, 0), 1)
+    if position[1] <= 0:
+        return ((0, 1), 1)
+    if position[1] >= display[1] - blockSize:
+        return ((0, -1), 1)
+    return ((0, 0), 0)
 
-while (not gameEnded) and (not collidingWall(snake)):
+def reflect(vel, nor):
+    if nor[0] == 0 and nor[1] == 0:
+        return vel
+    else:
+        return (2*dot(vel,nor)*nor[0]-vel[0], 2*dot(vel,nor)*nor[1]-vel[1])
+
+def dot(a, b):
+    return a[0]*b[0]+a[1]*b[1]
+
+def negVector(vec):
+    return (-vec[0], -vec[1])
+
+while (not gameEnded) and (collidingWall(snake.head()[1])[1] == 0):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameEnded = True
@@ -76,13 +100,25 @@ while (not gameEnded) and (not collidingWall(snake)):
             elif event.key == pygame.K_SPACE:
                 addBody(snake, (0,0,255))
 
-    if collidingWall(snake):
+    if collidingWall(snake.head()[1])[1] != 0:
         gameEnded = True
         break
 
     step(snake, (velocityX, velocityY))
-
     showSnake(snake)
+
+    
+
+    collide = collidingWall(ballPos)
+    if (collide[1] == 0):
+        ballPos = (ballPos[0] + ballVel[0], ballPos[1] + ballVel[1])
+    else:
+        ballVel = reflect(negVector(ballVel), collide[0])
+        ballPos = (ballPos[0] + ballVel[0], ballPos[1] + ballVel[1])
+
+    pixel(ballPos, (255,0,0))
+    
+
     pygame.display.update()
     pygame.draw.rect(game,(0,0,0),[0,0,display[0],display[1]])
     time.sleep(0.1)
