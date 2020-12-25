@@ -2,6 +2,7 @@ import pygame
 from sllist import SingleLinkedList
 import math
 import time
+from random import randrange
 
 def hsv2rgb(h, s, v):
     h = float(h)
@@ -38,14 +39,16 @@ blockSize = 10
 ballPos = (100, 150)
 ballVel = (1.0, 1.5)
 
+# food position
+foodPos = (100, 150)
+
 # snake velocity
 snakeVelocity = (0, 0)
 
-# (velocity), (position), (color)
 snake = SingleLinkedList()
 
-for x in range(20):
-    snake.prepend(((0, 0), (100, 100), hsv2rgb(x*(255/10),1,1)))
+for x in range(40):
+    snake.prepend(((0, 0), (100, 100), hsv2rgb(x*(255/20),1,1)))
 
 snake.printToConsole()
 
@@ -89,24 +92,22 @@ def collidingWall(pos):
     return ((0, 0), 0)
 
 def collidingPixels(posA, posB):
-    if (
-        posA[0] < posB[0] + blockSize and
+    if (posA[0] < posB[0] + blockSize and
         posA[0] + blockSize > posB[0] and
         posA[1] < posB[1] + blockSize and
         posA[1] + blockSize > posB[1]):
         xInd = posB[0] - posA[0]
         yInd = posB[1] - posA[1]
 
-        print("X: " + str(xInd) + ", Y: " + str(yInd))
-
         if (xInd < 0 and xInd < -abs(yInd)):
             return ((1, 0), 1)
-        elif (xInd > 0 and xInd > abs(yInd)):
+        if (xInd > 0 and xInd > abs(yInd)):
             return ((-1, 0), 1)
-        elif (yInd < 0):
+        if (yInd < 0):
             return ((0, 1), 1)
-        elif (yInd > 0):
+        if (yInd > 0):
             return ((0, -1), 1)
+        return ((0, 0), 1)
 
     return ((0, 0), 0)
 
@@ -152,8 +153,6 @@ while (not gameEnded) and (collidingWall(snake.head()[1])[1] == 0):
             elif event.key == pygame.K_DOWN:
                 snakeVelocity = (0, 1)
                 #ballPos = (ballPos[0], ballPos[1]+1)
-            elif event.key == pygame.K_SPACE:
-                addBody(snake, (0,0,255))
 
     if collidingWall(snake.head()[1])[1] != 0:
         gameEnded = True
@@ -172,6 +171,15 @@ while (not gameEnded) and (collidingWall(snake.head()[1])[1] == 0):
     collideSnake = overlappingSnake(snake, ballPos)
     if (collideSnake[1] != 0):
         ballVel = reflect(negVector(ballVel), collideSnake[0])
+
+    collidingFood = collidingPixels(snake.head()[1], foodPos)[1]
+    if (collidingFood == 1):
+        addBody(snake, hsv2rgb(randrange(255), 1, 1))
+        foodPos = (
+            math.floor(randrange(display[0])/blockSize)*blockSize,
+            math.floor(randrange(display[1])/blockSize)*blockSize)
+
+    pixel(foodPos, (255,255,255))
         
     ballPos = (ballPos[0] + ballVel[0], ballPos[1] + ballVel[1])
     pixel(ballPos, (255,0,0))
