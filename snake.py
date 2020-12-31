@@ -1,5 +1,4 @@
 from sllist import SingleLinkedList
-from random import randrange
 from my_math import hsv2rgb, collidingPixels
 import pygame
 import math
@@ -11,10 +10,10 @@ class Snake:
         self.blockSize = blockSize
         self.display = display
         self.game = game
-        self.foodPos = (0, 0)
+        self.foodPos = (display[0]/2, display[1]/2)
 
-        for x in range(40):
-            self.sllist.prepend(((0, 0), (100, 100), hsv2rgb(x*(255/20),1,1)))
+        for x in range(initialLength):
+            self.sllist.prepend(((0, 0), (100, 100), hsv2rgb(x*(255/(initialLength/2)),1,1)))
 
     def show(self, sllist):
         if sllist.head() is not None:
@@ -35,17 +34,21 @@ class Snake:
     def addBody(self, color):
         self.sllist.prepend((
             (self.sllist.head()[0][0], self.sllist.head()[0][1]), 
-            (self.sllist.head()[1][0] + self.sllist.head()[0][0]*blockSize,self.sllist.head()[1][1] + self.sllist.head()[0][1]*blockSize), 
-            color))
+            (
+                self.sllist.head()[1][0] + self.sllist.head()[0][0]*self.blockSize,
+                self.sllist.head()[1][1] + self.sllist.head()[0][1]*self.blockSize), 
+                color
+            )
+        )
 
     def collidingWall(self):
-        if self.sllist.head()[1][0] <= 0:
+        if self.sllist.head()[1][0] < 0:
             return ((1, 0), 1)
-        if self.sllist.head()[1][0] >= self.display[0] - self.blockSize:
+        if self.sllist.head()[1][0] > self.display[0] - self.blockSize:
             return ((-1, 0), 1)
-        if self.sllist.head()[1][1] <= 0:
+        if self.sllist.head()[1][1] < 0:
             return ((0, 1), 1)
-        if self.sllist.head()[1][1] >= self.display[1] - self.blockSize:
+        if self.sllist.head()[1][1] > self.display[1] - self.blockSize:
             return ((0, -1), 1)
         return ((0, 0), 0)
 

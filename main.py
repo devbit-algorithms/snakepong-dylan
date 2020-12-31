@@ -1,7 +1,9 @@
 import pygame
 from snake import Snake
-from my_math import collidingWall, collidingPixels, reflect, negVector
+from random import randrange
+from my_math import collidingWall, collidingPixels, reflect, negVector, hsv2rgb
 import time
+import math
 
 pygame.init()
 
@@ -62,7 +64,7 @@ while (not gameEnded) and (snake.collidingWall()[1] == 0):
 
     collidingFood = collidingPixels(snake.sllist.head()[1], snake.foodPos, blockSize)[1]
     if (collidingFood == 1):
-        addBody(snake, hsv2rgb(randrange(255), 1, 1))
+        snake.addBody((255,255,255))
         snake.foodPos = (
             math.floor(randrange(display[0])/blockSize)*blockSize,
             math.floor(randrange(display[1])/blockSize)*blockSize)

@@ -34,13 +34,13 @@ def negVector(vec):
     return (-vec[0], -vec[1])
 
 def collidingWall(pos, display, blockSize):
-    if pos[0] <= 0:
+    if pos[0] < 0:
         return ((1, 0), 1)
-    if pos[0] >= display[0] - blockSize:
+    if pos[0] > display[0] - blockSize:
         return ((-1, 0), 1)
-    if pos[1] <= 0:
+    if pos[1] < 0:
         return ((0, 1), 1)
-    if pos[1] >= display[1] - blockSize:
+    if pos[1] > display[1] - blockSize:
         return ((0, -1), 1)
     return ((0, 0), 0)
 
