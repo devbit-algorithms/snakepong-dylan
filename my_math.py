@@ -1,5 +1,6 @@
 import math
 
+# https://code.activestate.com/recipes/576919-python-rgb-and-hsv-conversion/
 def hsv2rgb(h, s, v):
     h = float(h)
     s = float(s)
@@ -21,6 +22,7 @@ def hsv2rgb(h, s, v):
     r, g, b = int(r * 255), int(g * 255), int(b * 255)
     return (r, g, b)
 
+# https://www.fabrizioduroni.it/2017/08/25/how-to-calculate-reflection-vector.html
 def reflect(vel, nor):
     if nor[0] == 0 and nor[1] == 0:
         return vel

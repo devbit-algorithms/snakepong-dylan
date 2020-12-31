@@ -1,19 +1,21 @@
 from sllist import SingleLinkedList
-from my_math import hsv2rgb, collidingPixels
+from my_math import hsv2rgb, collidingPixels, collidingWall
 import pygame
 import math
 
 class Snake:
-    def __init__(self, initialLength, blockSize, game, display):
+    def __init__(self, initialLength, iniPosition, blockSize, game, display):
         self.sllist = SingleLinkedList()
         self.snakeVelocity = (0, 0)
         self.blockSize = blockSize
         self.display = display
         self.game = game
-        self.foodPos = (display[0]/2, display[1]/2)
+
+        if display is not None:
+            self.foodPos = (display[0]/2, display[1]/2)
 
         for x in range(initialLength):
-            self.sllist.prepend(((0, 0), (100, 100), hsv2rgb(x*(255/(initialLength/2)),1,1)))
+            self.sllist.prepend(((0, 0), iniPosition, hsv2rgb(x*(360/initialLength),1,1)))
 
     def show(self, sllist):
         if sllist.head() is not None:
@@ -41,16 +43,8 @@ class Snake:
             )
         )
 
-    def collidingWall(self):
-        if self.sllist.head()[1][0] < 0:
-            return ((1, 0), 1)
-        if self.sllist.head()[1][0] > self.display[0] - self.blockSize:
-            return ((-1, 0), 1)
-        if self.sllist.head()[1][1] < 0:
-            return ((0, 1), 1)
-        if self.sllist.head()[1][1] > self.display[1] - self.blockSize:
-            return ((0, -1), 1)
-        return ((0, 0), 0)
+    def overlappingWall(self):
+        return collidingWall(self.sllist.head()[1], self.display, self.blockSize)
 
     def overlappingSnake(self, sllist, position):
         overlapping = False
